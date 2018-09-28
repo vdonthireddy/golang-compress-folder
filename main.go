@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
+    "path/filepath"
+    "bufio"
 )
 
 func main() {
@@ -16,18 +17,35 @@ func main() {
 }
 
 func compress(codePath string) {
+
+    zipFileName := path.Base(codePath) + ".zip"
+
+    if _, err := os.Stat(zipFileName); !os.IsNotExist(err) {
+        fmt.Print(zipFileName + " exists, overwrite? (y/n) n")
+        reader := bufio.NewReader(os.Stdin)
+        text, _ := reader.ReadString('\n')
+        text = strings.Replace(text, "\n", "", -1)
+        fmt.Println("User input: " + text)
+
+        if (strings.Compare("y", text) == 0) {
+            fmt.Println(zipFileName + " will be deleted")
+            os.Remove(zipFileName)
+        } else {
+            fmt.Println("text is not y")
+            return
+        }
+    }
+
 	files, err := listFiles(codePath)
 	if err != nil {
 		panic(err)
 	}
 
-    zipFileName := path.Base(codePath) + ".zip"
-
     zipMe(files, path.Dir(codePath), zipFileName)
     
-	// for _, f := range files {
-	// 	fmt.Println(f)
-	// }
+	for _, f := range files {
+		fmt.Println(f)
+	}
 	fmt.Println("Done!")
 }
 
